@@ -265,10 +265,14 @@ func (b *Broker) consume(deliveries <-chan amqp.Delivery, concurrency int, taskP
 	for {
 		select {
 		case amqpErr := <-amqpCloseChan:
+			log.INFO.Printf("consumeOne amqpErr: %s, %+v", workerName, amqpErr)
 			return amqpErr
 		case err := <-errorsChan:
+			log.INFO.Printf("consumeOne ErrChan: %s, %+v", workerName, err)
 			return err
 		case d := <-deliveries:
+			log.INFO.Printf("consumeOne Pre: %s", workerName)
+			log.INFO.Printf("consumeOne Pre: %s, %+v", workerName, b.processingWG)
 			if concurrency > 0 {
 				// get worker from pool (blocks until one is available)
 				<-pool
@@ -295,6 +299,7 @@ func (b *Broker) consume(deliveries <-chan amqp.Delivery, concurrency int, taskP
 				}
 			}()
 		case <-b.GetStopChan():
+			log.INFO.Printf("consumeOne stop: %s", workerName)
 			return nil
 		}
 	}
