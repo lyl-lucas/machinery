@@ -168,7 +168,7 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 
 	// Call the task
 	results, err := task.Call()
-	log.INFO.Println("Ack Check: uuid=%s, %+v, %+v", signature.UUID,)
+	log.INFO.Println("Ack Check: uuid=%s, %+v, %+v", signature.UUID,results,err)
 	if err != nil {
 		// If a tasks.ErrRetryTaskLater was returned from the task,
 		// retry the task after specified duration
