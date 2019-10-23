@@ -168,6 +168,7 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 
 	// Call the task
 	results, err := task.Call()
+	log.INFO.Println("Ack Check: uuid=%s, %+v, %+v", signature.UUID,)
 	if err != nil {
 		// If a tasks.ErrRetryTaskLater was returned from the task,
 		// retry the task after specified duration
@@ -263,7 +264,7 @@ func (worker *Worker) taskSucceeded(signature *tasks.Signature, taskResults []*t
 
 		worker.server.SendTask(successTask)
 	}
-
+	log.DEBUG.Printf("Processed OnSuccess %s", signature.UUID)
 	// If the task was not part of a group, just return
 	if signature.GroupUUID == "" {
 		return nil
@@ -277,11 +278,13 @@ func (worker *Worker) taskSucceeded(signature *tasks.Signature, taskResults []*t
 	if err != nil {
 		return fmt.Errorf("Completed check for group %s returned error: %s", signature.GroupUUID, err)
 	}
+	log.DEBUG.Printf("Processed GroupCompleted %s", signature.UUID)
 
 	// If the group has not yet completed, just return
 	if !groupCompleted {
 		return nil
 	}
+	log.DEBUG.Printf("Processed Not GroupCompleted %s", signature.UUID)
 
 	// Defer purging of group meta queue if we are using AMQP backend
 	if worker.hasAMQPBackend() {
@@ -303,6 +306,7 @@ func (worker *Worker) taskSucceeded(signature *tasks.Signature, taskResults []*t
 	if !shouldTrigger {
 		return nil
 	}
+	log.DEBUG.Printf("Processed shouldTrigger %s", signature.UUID)
 
 	// Get task states
 	taskStates, err := worker.server.GetBackend().GroupTaskStates(

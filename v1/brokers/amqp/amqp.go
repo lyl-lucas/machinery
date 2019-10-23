@@ -330,7 +330,12 @@ func (b *Broker) consumeOne(delivery amqp.Delivery, taskProcessor iface.TaskProc
 	log.INFO.Printf("Received new message: %s", delivery.Body)
 
 	err := taskProcessor.Process(signature)
-	delivery.Ack(multiple)
+	log.INFO.Printf("Ack Start: %s", delivery.Body)
+	ackErr := delivery.Ack(multiple)
+	if ackErr != nil {
+		log.INFO.Printf("Ack Error: %+v, %s", ackErr, delivery.Body)
+	}
+	log.INFO.Printf("Ack End: %s", delivery.Body)
 	return err
 }
 
