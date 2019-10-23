@@ -261,7 +261,7 @@ func (b *Broker) consume(deliveries <-chan amqp.Delivery, concurrency int, taskP
 	}()
 
 	errorsChan := make(chan error)
-
+	workerName := taskProcessor.CustomQueue()
 	for {
 		select {
 		case amqpErr := <-amqpCloseChan:
@@ -279,11 +279,15 @@ func (b *Broker) consume(deliveries <-chan amqp.Delivery, concurrency int, taskP
 			// Consume the task inside a gotourine so multiple tasks
 			// can be processed concurrently
 			go func() {
+				log.INFO.Printf("consumeOne Start: %s", workerName)
 				if err := b.consumeOne(d, taskProcessor); err != nil {
+					log.INFO.Printf("consumeOne Error: %s, %+v", workerName, err)
 					errorsChan <- err
 				}
-
+				log.INFO.Printf("consumeOne End: %s", workerName)
+				log.INFO.Printf("consumeOne End: %s, %+v", workerName, b.processingWG)
 				b.processingWG.Done()
+				log.INFO.Printf("consumeOne Done: %s", workerName)
 
 				if concurrency > 0 {
 					// give worker back to pool

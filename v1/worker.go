@@ -180,13 +180,13 @@ func (worker *Worker) Process(signature *tasks.Signature) error {
 		// Otherwise, execute default retry logic based on signature.RetryCount
 		// and signature.RetryTimeout values
 		if signature.RetryCount > 0 {
-			log.INFO.Printf("Ack taskRetry: uuid=%s, %+v", signature.UUID)
+			log.INFO.Printf("Ack taskRetry: uuid=%s, %+v", signature.UUID, signature)
 			return worker.taskRetry(signature)
 		}
-		log.INFO.Printf("Ack taskFailed: uuid=%s, %+v", signature.UUID,err)
+		log.INFO.Printf("Ack taskFailed: uuid=%s, %+v, %+v", signature.UUID,err, signature)
 		return worker.taskFailed(signature, err)
 	}
-	log.INFO.Printf("Ack taskSucceeded: uuid=%s, %+v", signature.UUID,results)
+	log.INFO.Printf("Ack taskSucceeded: uuid=%s, %+v, %+v", signature.UUID, signature, results)
 	return worker.taskSucceeded(signature, results)
 }
 
